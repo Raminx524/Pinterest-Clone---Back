@@ -5,7 +5,7 @@ dotenv.config(); // Load env vars
 
 async function connectDB() {
   try {
-    const mongoUri = process.env.MONGO_URI;
+    const mongoUri = process.env.MONGODB_CONNECTION_STRING;
     if (!mongoUri) {
       throw new Error("MONGO_URI is not defined in the environment variables");
     }

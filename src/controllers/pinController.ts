@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import Pin from "../models/pin.model";
 import User from "../models/user.model";
 import Board from "../models/board.model";
+import Like from "../models/like.model";
+import Comment from "../models/comment.model";
 
 
 
@@ -9,19 +11,15 @@ import Board from "../models/board.model";
 export const getPinByID = async (req: Request, res: Response) => {
   try {
     const { pinId } = req.params;
-    // Validate the pinId
     if (!pinId) {
       return res.status(400).json({ message: "Invalid pin ID" });
     }
     
-    // Fetch pin by the given pinId
     const pin = await Pin.findById(pinId);
-    // Check if no pin found
     if (!pin) {
       return res.status(404).json({ message: "Pin not found" });
     }
 
-    // Send response with the pin
     res.status(200).json(pin);
   } catch (error) {
     if (error instanceof Error) {
@@ -38,10 +36,7 @@ export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
 
-    // Validate request body
 
-    // Validate and parse appointmentDate
-    // Find the user and business in the database
     const user = await User.findById(newPin.user);
     const boards = await Board.findById(newPin.boards[0]);
 
@@ -53,7 +48,6 @@ export const createPIn = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    // Create the pin
     const pin = new Pin(newPin);
 
     const response = await pin.save();
@@ -81,11 +75,14 @@ export const deletePin = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Pin not found" });
     }
 
-    // Assuming there are references to pins in User and Board models
     await User.updateMany({ pins: pin._id }, { $pull: { pins: pin._id } });
     await Board.updateMany({ pins: pin._id }, { $pull: { pins: pin._id } });
 
-    return res.status(200).json({ message: "Pin removed successfully" });
+    await Comment.deleteMany({ pin: pin._id });
+
+    await Like.deleteMany({ pin: pin._id });
+
+    return res.status(200).json({ message: "Pin and associated data removed successfully" });
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error deleting pin:", error.message);
@@ -96,6 +93,7 @@ export const deletePin = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const pinsController = {
   getPinByID, createPIn, deletePin

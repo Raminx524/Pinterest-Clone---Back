@@ -20,7 +20,7 @@ const createComment = async (req: Request, res: Response) => {
     }
   
     const newComment = new Comment({
-      user: userId,
+      user: user,
       pin: pinId,
       text: text,
     });
@@ -48,7 +48,6 @@ const editComment = async (req: Request, res: Response) => {
     }
 
     commentToEdit.text = text;
-
     await commentToEdit.save();
 
     return res.status(200).json({ message: "Comment edited successfully" });
@@ -62,20 +61,16 @@ const deleteComment = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
 
-    // Find the comment to delete
     const commentToDelete = await Comment.findById(commentId);
     if (!commentToDelete) {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    // Find the associated pin and remove the comment reference
     const pin = await Pin.findById(commentToDelete.pin);
     if (pin) {
       pin.comments.pull(commentToDelete._id);
       await pin.save();
     }
-
-    // Delete the comment itself
     await Comment.findByIdAndDelete(commentId);
 
     return res.status(200).json({ message: "Comment deleted successfully" });

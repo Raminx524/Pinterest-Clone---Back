@@ -13,8 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.boardsController = exports.getPinsByBoardID = void 0;
-const pin_model_1 = __importDefault(require("../models/pin.model")); // Import Pin model
+const pin_model_1 = __importDefault(require("../models/pin.model"));
 const board_model_1 = __importDefault(require("../models/board.model"));
+const like_model_1 = __importDefault(require("../models/like.model"));
+const comment_model_1 = __importDefault(require("../models/comment.model"));
 const getBoardByID = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { boardId } = req.params;
@@ -37,13 +39,10 @@ const getPinsByBoardID = (req, res) => __awaiter(void 0, void 0, void 0, functio
         if (!boardId) {
             return res.status(400).json({ message: "Invalid board ID" });
         }
-        // Find pins associated with the given boardId
         const pins = yield pin_model_1.default.find({ boards: boardId });
-        // Check if no pins are found
         if (pins.length === 0) {
             return res.status(404).json({ message: "No pins found for this board" });
         }
-        // Send response with the pins
         res.status(200).json(pins);
     }
     catch (error) {
@@ -78,30 +77,32 @@ const createBoard = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 const deleteBoard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { boardId } = req.params;
-        // Validate the boardId
         if (!boardId) {
             return res.status(400).json({ message: "Invalid board ID" });
         }
-        // Delete the board
         const deletedBoard = yield board_model_1.default.findByIdAndDelete(boardId);
         if (!deletedBoard) {
             return res.status(404).json({ message: "Board not found" });
         }
-        // Delete all pins associated with the board
-        const result = yield pin_model_1.default.deleteMany({ boards: boardId });
-        if (result.deletedCount === 0) {
+        const pins = yield pin_model_1.default.find({ boards: boardId });
+        if (pins.length === 0) {
             console.log("No pins found to delete for this board");
         }
         else {
-            console.log(`${result.deletedCount} pins deleted`);
+            const pinIds = pins.map(pin => pin._id);
+            yield comment_model_1.default.deleteMany({ pin: { $in: pinIds } });
+            yield like_model_1.default.deleteMany({ pin: { $in: pinIds } });
+            yield pin_model_1.default.deleteMany({ boards: boardId });
+            console.log(`${pins.length} pins and their associated comments and likes deleted`);
         }
-        return res.status(200).json({ message: "Board and associated pins deleted successfully" });
+        return res.status(200).json({ message: "Board and associated pins, comments, and likes deleted successfully" });
     }
     catch (error) {
         console.error("Error deleting board:", error);
         return res.status(500).json({ message: "Error deleting board" });
     }
 });
+exports.default = deleteBoard;
 exports.boardsController = {
     getBoardByID, getPinsByBoardID: exports.getPinsByBoardID, createBoard, deleteBoard
 };

@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IPin extends Document {
-  user: Types.ObjectId; // Reference to the User who created the pin
+  user: Types.ObjectId; 
   title: string;
   description?: string;
   imageUrl: string;
-  linkUrl?: string; // Optional link to an external source
+  linkUrl?: string; 
   boards: Types.ObjectId[];
   comments: Types.ObjectId[];
 }

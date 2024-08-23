@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.likeController = exports.deleteLike = exports.createLike = void 0;
 const like_model_1 = __importDefault(require("../models/like.model"));
 const user_model_1 = __importDefault(require("../models/user.model"));
-// Create a like
 const createLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { pinId } = req.params;
@@ -44,7 +43,6 @@ const deleteLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { pinId } = req.params;
         const userId = req.body.user;
-        // Find and delete the like
         const like = yield like_model_1.default.findOneAndDelete({
             user: userId,
             pin: pinId,
@@ -52,7 +50,6 @@ const deleteLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (!like) {
             return res.status(404).json({ message: "Like not found" });
         }
-        // Optionally, remove the like reference from the user if stored
         yield user_model_1.default.findByIdAndUpdate(userId, {
             $pull: { likes: like._id },
         });

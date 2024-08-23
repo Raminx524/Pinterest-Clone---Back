@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import Pin from "../models/pin.model"; // Import Pin model
+import Pin from "../models/pin.model"; 
 import Board from "../models/board.model";
+import Like from "../models/like.model";
+import Comment from "../models/comment.model";
 
 const getBoardByID = async (req: Request, res: Response) => {
   try {
@@ -26,15 +28,11 @@ export const getPinsByBoardID = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid board ID" });
     }
 
-    // Find pins associated with the given boardId
-    const pins = await Pin.find({ boards: boardId });
-
-    // Check if no pins are found
+    const pins = await Pin.find({ boards: boardId });    
     if (pins.length === 0) {
       return res.status(404).json({ message: "No pins found for this board" });
     }
 
-    // Send response with the pins
     res.status(200).json(pins);
   } catch (error) {
     if (error instanceof Error) {
@@ -68,33 +66,38 @@ const deleteBoard = async (req: Request, res: Response) => {
   try {
     const { boardId } = req.params;
 
-    // Validate the boardId
     if (!boardId) {
       return res.status(400).json({ message: "Invalid board ID" });
     }
 
-    // Delete the board
     const deletedBoard = await Board.findByIdAndDelete(boardId);
 
     if (!deletedBoard) {
       return res.status(404).json({ message: "Board not found" });
     }
 
-    // Delete all pins associated with the board
-    const result = await Pin.deleteMany({ boards: boardId });
+    const pins = await Pin.find({ boards: boardId });
 
-    if (result.deletedCount === 0) {
+    if (pins.length === 0) {
       console.log("No pins found to delete for this board");
     } else {
-      console.log(`${result.deletedCount} pins deleted`);
+      const pinIds = pins.map(pin => pin._id);
+
+      await Comment.deleteMany({ pin: { $in: pinIds } });
+      await Like.deleteMany({ pin: { $in: pinIds } });
+      await Pin.deleteMany({ boards: boardId });
+      console.log(`${pins.length} pins and their associated comments and likes deleted`);
     }
 
-    return res.status(200).json({ message: "Board and associated pins deleted successfully" });
+    return res.status(200).json({ message: "Board and associated pins, comments, and likes deleted successfully" });
   } catch (error) {
     console.error("Error deleting board:", error);
     return res.status(500).json({ message: "Error deleting board" });
   }
 };
+
+export default deleteBoard;
+
 
 
 

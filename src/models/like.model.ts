@@ -1,8 +1,8 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface ILike extends Document {
-  user: Types.ObjectId; // Reference to the User who liked the pin
-  pin: Types.ObjectId; // Reference to the Pin that was liked
+  user: Types.ObjectId; 
+  pin: Types.ObjectId; 
 }
 
 const likeSchema = new mongoose.Schema<ILike>(

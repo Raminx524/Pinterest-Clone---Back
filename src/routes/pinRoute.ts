@@ -1,5 +1,5 @@
 import express from "express";
-import { jwtCheck, jwtParse } from "../middleware/auth"; // Import any middleware if needed
+import { jwtCheck, jwtParse } from "../middleware/auth"; 
 import { pinsController } from "../controllers/pinController";
 
 const router = express.Router();

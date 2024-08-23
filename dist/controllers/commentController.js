@@ -29,7 +29,7 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(404).json({ message: "User not found" });
         }
         const newComment = new comment_model_1.default({
-            user: userId,
+            user: user,
             pin: pinId,
             text: text,
         });
@@ -46,15 +46,12 @@ const createComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 const editComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { commentId } = req.params;
-        const { text } = req.body; // Correctly destructure text from req.body
-        // Find the comment to edit
+        const { text } = req.body;
         const commentToEdit = yield comment_model_1.default.findById(commentId);
         if (!commentToEdit) {
             return res.status(404).json({ message: "Comment not found" });
         }
-        // Update the comment's text
         commentToEdit.text = text;
-        // Save the updated comment
         yield commentToEdit.save();
         return res.status(200).json({ message: "Comment edited successfully" });
     }
@@ -68,19 +65,23 @@ const deleteComment = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const { commentId } = req.params;
         const commentToDelete = yield comment_model_1.default.findById(commentId);
         if (!commentToDelete) {
-            return res
-                .status(404)
-                .json({ message: "comment not found" });
+            return res.status(404).json({ message: "Comment not found" });
         }
-        yield pin_model_1.default.updateOne({ _id: commentId }, { $pull: { comments: commentId } });
+        const pin = yield pin_model_1.default.findById(commentToDelete.pin);
+        if (pin) {
+            pin.comments.pull(commentToDelete._id);
+            yield pin.save();
+        }
         yield comment_model_1.default.findByIdAndDelete(commentId);
-        return res.status(200).json({ message: "comment deleted successfully" });
+        return res.status(200).json({ message: "Comment deleted successfully" });
     }
     catch (error) {
-        console.log("deletecomment function error", error);
+        console.log("Delete comment function error", error);
         return res.status(500).json({ message: "Error deleting comment" });
     }
 });
 exports.commentController = {
-    createComment, editComment, deleteComment
+    createComment,
+    editComment,
+    deleteComment,
 };

@@ -1,13 +1,13 @@
 import dotenv from "dotenv";
-dotenv.config(); // Load config
+dotenv.config(); 
 
 import express, { Application } from "express";
 import cors from "cors";
 import connectDB from "./config/db";
 import { createServer, Server } from "http";
 import { Server as SocketIOServer } from "socket.io";
-import pinRoute from "./routes/pinRoute"; // Adjust path if necessary
-import boardRoute from "./routes/boardRoute"; // Adjust path if necessary
+import pinRoute from "./routes/pinRoute"; 
+import boardRoute from "./routes/boardRoute"; 
 import likeRoute from "./routes/likeRoute";
 import commentRoute from "./routes/commentRoute";
 import userRoute from "./routes/userRoute";

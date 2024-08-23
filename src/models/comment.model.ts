@@ -1,8 +1,8 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IComment extends Document {
-  user: Types.ObjectId; // Reference to the User who made the comment
-  pin: Types.ObjectId; // Reference to the Pin on which the comment was made
+  user: Types.ObjectId; 
+  pin: Types.ObjectId; 
   text: string;
 }
 

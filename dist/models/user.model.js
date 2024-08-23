@@ -32,8 +32,8 @@ const userSchema = new mongoose_1.default.Schema({
     bio: { type: String },
     boards: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Board", default: [] }],
     pins: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Pin", default: [] }],
-    followers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs who follow this user
-    following: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs this user follows
+    followers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: true });
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;

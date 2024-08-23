@@ -2,15 +2,15 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
-  firebaseUid: string; // UID from Firebase
-  email: string; // Email from Firebase
+  firebaseUid: string; 
+  email: string; 
   username: string;
-  avatarUrl?: string; // Optional profile picture
-  bio?: string; // Optional bio for user profile
+  avatarUrl?: string; 
+  bio?: string; 
   boards: Types.ObjectId[];
   pins: Types.ObjectId[];
-  followers: Types.ObjectId[]; // Users following this user
-  following: Types.ObjectId[]; // Users this user is following
+  followers: Types.ObjectId[]; 
+  following: Types.ObjectId[]; 
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -22,8 +22,8 @@ const userSchema = new mongoose.Schema<IUser>(
     bio: { type: String },
     boards: [{ type: Schema.Types.ObjectId, ref: "Board", default: [] }],
     pins: [{ type: Schema.Types.ObjectId, ref: "Pin", default: [] }],
-    followers: [{ type: Schema.Types.ObjectId, ref: "User" }], // Array of user IDs who follow this user
-    following: [{ type: Schema.Types.ObjectId, ref: "User" }], // Array of user IDs this user follows
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }], 
+    following: [{ type: Schema.Types.ObjectId, ref: "User" }], 
   },
   { timestamps: true }
 );

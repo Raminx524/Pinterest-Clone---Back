@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IBoard extends Document {
-  user: Types.ObjectId; // Reference to the User who owns the board
+  user: Types.ObjectId; 
   title: string;
   description?: string;
   pins: Types.ObjectId[];

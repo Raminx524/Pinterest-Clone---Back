@@ -32,41 +32,35 @@ dotenv_1.default.config();
             yield comment_model_1.default.deleteMany({});
             yield like_model_1.default.deleteMany({});
             console.log("Existing data cleared");
-            // Create users
-            const users = [];
-            for (let i = 1; i <= 5; i++) {
-                const user = new user_model_1.default({
-                    firebaseUid: `uid_${i * 123}`,
-                    email: `user${i}@example.com`,
-                    username: `user${i}`,
-                    avatarUrl: `http://example.com/avatar${i}.png`,
-                    bio: `Bio for user ${i}`,
-                    boards: [],
-                    pins: [],
-                    followers: [],
-                    following: []
-                });
-                yield user.save();
-                users.push(user);
-            }
-            console.log("Users created");
-            // Create boards
+            // Create a single user
+            const user = new user_model_1.default({
+                firebaseUid: `uid_12345`,
+                email: `user@example.com`,
+                username: `user`,
+                avatarUrl: `http://example.com/avatar.png`,
+                bio: `Bio for user`,
+                boards: [],
+                pins: [],
+                followers: [],
+                following: []
+            });
+            yield user.save();
+            console.log("User created");
+            // Create two boards
             const boards = [];
-            for (const user of users) {
-                for (let i = 1; i <= 4; i++) {
-                    const board = new board_model_1.default({
-                        user: user._id,
-                        title: `Board ${i}`,
-                        description: `Description for board ${i}`,
-                    });
-                    yield board.save();
-                    boards.push(board);
-                    user.boards.push(board._id);
-                }
-                yield user.save(); // Update user's boards
+            for (let i = 1; i <= 2; i++) {
+                const board = new board_model_1.default({
+                    user: user._id,
+                    title: `Board ${i}`,
+                    description: `Description for board ${i}`,
+                });
+                yield board.save();
+                boards.push(board);
+                user.boards.push(board._id);
             }
+            yield user.save(); // Update user's boards
             console.log("Boards created");
-            // Create pins and comments
+            // Create pins, comments, and likes
             const pins = [];
             for (const board of boards) {
                 for (let i = 1; i <= 3; i++) {
@@ -80,27 +74,21 @@ dotenv_1.default.config();
                     yield pin.save();
                     pins.push(pin);
                     // Create comments
-                    for (let j = 1; j <= 4; j++) {
-                        const commentUser = users[Math.floor(Math.random() * users.length)];
-                        if (commentUser._id.toString() !== board.user.toString()) {
-                            const comment = new comment_model_1.default({
-                                user: commentUser._id,
-                                pin: pin._id,
-                                text: `Comment ${j} on pin ${i}`,
-                            });
-                            yield comment.save();
-                        }
+                    for (let j = 1; j <= 3; j++) {
+                        const comment = new comment_model_1.default({
+                            user: user._id, // Same user comments on their own pins
+                            pin: pin._id,
+                            text: `Comment ${j} on pin ${i}`,
+                        });
+                        yield comment.save();
                     }
                     // Create likes
-                    for (let k = 0; k < 3; k++) {
-                        const likeUser = users[Math.floor(Math.random() * users.length)];
-                        if (likeUser._id.toString() !== board.user.toString()) {
-                            const like = new like_model_1.default({
-                                user: likeUser._id,
-                                pin: pin._id,
-                            });
-                            yield like.save();
-                        }
+                    for (let k = 0; k < 2; k++) {
+                        const like = new like_model_1.default({
+                            user: user._id, // Same user likes their own pins
+                            pin: pin._id,
+                        });
+                        yield like.save();
                     }
                 }
             }

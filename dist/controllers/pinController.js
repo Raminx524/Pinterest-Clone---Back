@@ -16,20 +16,18 @@ exports.pinsController = exports.deletePin = exports.createPIn = exports.getPinB
 const pin_model_1 = __importDefault(require("../models/pin.model"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const board_model_1 = __importDefault(require("../models/board.model"));
+const like_model_1 = __importDefault(require("../models/like.model"));
+const comment_model_1 = __importDefault(require("../models/comment.model"));
 const getPinByID = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { pinId } = req.params;
-        // Validate the pinId
         if (!pinId) {
             return res.status(400).json({ message: "Invalid pin ID" });
         }
-        // Fetch pin by the given pinId
         const pin = yield pin_model_1.default.findById(pinId);
-        // Check if no pin found
         if (!pin) {
             return res.status(404).json({ message: "Pin not found" });
         }
-        // Send response with the pin
         res.status(200).json(pin);
     }
     catch (error) {
@@ -47,9 +45,6 @@ exports.getPinByID = getPinByID;
 const createPIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newPin = req.body;
-        // Validate request body
-        // Validate and parse appointmentDate
-        // Find the user and business in the database
         const user = yield user_model_1.default.findById(newPin.user);
         const boards = yield board_model_1.default.findById(newPin.boards[0]);
         if (!user) {
@@ -58,7 +53,6 @@ const createPIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!boards) {
             return res.status(404).json({ message: "Board not found" });
         }
-        // Create the pin
         const pin = new pin_model_1.default(newPin);
         const response = yield pin.save();
         console.log(response);
@@ -83,10 +77,11 @@ const deletePin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!pin) {
             return res.status(404).json({ message: "Pin not found" });
         }
-        // Assuming there are references to pins in User and Board models
         yield user_model_1.default.updateMany({ pins: pin._id }, { $pull: { pins: pin._id } });
         yield board_model_1.default.updateMany({ pins: pin._id }, { $pull: { pins: pin._id } });
-        return res.status(200).json({ message: "Pin removed successfully" });
+        yield comment_model_1.default.deleteMany({ pin: pin._id });
+        yield like_model_1.default.deleteMany({ pin: pin._id });
+        return res.status(200).json({ message: "Pin and associated data removed successfully" });
     }
     catch (error) {
         if (error instanceof Error) {

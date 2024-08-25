@@ -67,7 +67,7 @@ dotenv.config();
           imageUrl: `http:
           
           //example.com/image${i}.png`,
-          boards: [board._id],
+          board: board._id,
         });
         await pin.save();
         pins.push(pin);

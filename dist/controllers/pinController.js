@@ -24,11 +24,23 @@ const getPinByID = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (!pinId) {
             return res.status(400).json({ message: "Invalid pin ID" });
         }
-        const pin = yield pin_model_1.default.findById(pinId);
+        // Fetch the pin
+        const pin = yield pin_model_1.default.findById(pinId)
+            .populate({
+            path: 'comments',
+            populate: {
+                path: 'user',
+                select: 'username avatarUrl',
+            }
+        });
         if (!pin) {
             return res.status(404).json({ message: "Pin not found" });
         }
-        res.status(200).json(pin);
+        // Fetch likes associated with the pin
+        const likes = yield like_model_1.default.find({ pin: pinId }).populate('user', 'username avatarUrl');
+        // Attach likes to the pin object
+        const pinWithLikes = Object.assign(Object.assign({}, pin.toObject()), { likes });
+        res.status(200).json(pinWithLikes);
     }
     catch (error) {
         if (error instanceof Error) {
@@ -46,15 +58,17 @@ const createPIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newPin = req.body;
         const user = yield user_model_1.default.findById(newPin.user);
-        const boards = yield board_model_1.default.findById(newPin.boards[0]);
+        const board = yield board_model_1.default.findById(newPin.board);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        if (!boards) {
+        if (!board) {
             return res.status(404).json({ message: "Board not found" });
         }
         const pin = new pin_model_1.default(newPin);
         const response = yield pin.save();
+        board.pins.push(pin._id);
+        yield board.save();
         console.log(response);
         return res.status(201).json(pin);
     }

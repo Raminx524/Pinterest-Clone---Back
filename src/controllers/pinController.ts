@@ -15,12 +15,30 @@ export const getPinByID = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid pin ID" });
     }
     
-    const pin = await Pin.findById(pinId);
+    // Fetch the pin
+    const pin = await Pin.findById(pinId)
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'username avatarUrl',
+        }
+      });
+
     if (!pin) {
       return res.status(404).json({ message: "Pin not found" });
     }
 
-    res.status(200).json(pin);
+    // Fetch likes associated with the pin
+    const likes = await Like.find({ pin: pinId }).populate('user', 'username avatarUrl');
+
+    // Attach likes to the pin object
+    const pinWithLikes = {
+      ...pin.toObject(),
+      likes,
+    };
+
+    res.status(200).json(pinWithLikes);
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching pin:", error.message);
@@ -32,25 +50,28 @@ export const getPinByID = async (req: Request, res: Response) => {
   }
 };
 
+
+
 export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
 
 
     const user = await User.findById(newPin.user);
-    const boards = await Board.findById(newPin.boards[0]);
+    const board = await Board.findById(newPin.board);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!boards) {
+    if (!board) {
       return res.status(404).json({ message: "Board not found" });
     }
 
     const pin = new Pin(newPin);
-
     const response = await pin.save();
+    board.pins.push(pin._id)
+    await board.save();
     console.log(response);
 
     return res.status(201).json(pin);

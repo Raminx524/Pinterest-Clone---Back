@@ -25,19 +25,19 @@ dotenv_1.default.config();
         try {
             yield mongoose_1.default.connect(process.env.MONGODB_CONNECTION_STRING);
             console.log("Database connected");
-            // Clear existing data
             yield user_model_1.default.deleteMany({});
             yield board_model_1.default.deleteMany({});
             yield pin_model_1.default.deleteMany({});
             yield comment_model_1.default.deleteMany({});
             yield like_model_1.default.deleteMany({});
             console.log("Existing data cleared");
-            // Create a single user
             const user = new user_model_1.default({
                 firebaseUid: `uid_12345`,
                 email: `user@example.com`,
                 username: `user`,
-                avatarUrl: `http://example.com/avatar.png`,
+                avatarUrl: `http:
+      
+      //example.com/avatar.png`,
                 bio: `Bio for user`,
                 boards: [],
                 pins: [],
@@ -46,7 +46,6 @@ dotenv_1.default.config();
             });
             yield user.save();
             console.log("User created");
-            // Create two boards
             const boards = [];
             for (let i = 1; i <= 2; i++) {
                 const board = new board_model_1.default({
@@ -58,9 +57,8 @@ dotenv_1.default.config();
                 boards.push(board);
                 user.boards.push(board._id);
             }
-            yield user.save(); // Update user's boards
+            yield user.save();
             console.log("Boards created");
-            // Create pins, comments, and likes
             const pins = [];
             for (const board of boards) {
                 for (let i = 1; i <= 3; i++) {
@@ -68,24 +66,24 @@ dotenv_1.default.config();
                         user: board.user,
                         title: `Pin ${i}`,
                         description: `Description for pin ${i}`,
-                        imageUrl: `http://example.com/image${i}.png`,
-                        boards: [board._id],
+                        imageUrl: `http:
+          
+          //example.com/image${i}.png`,
+                        board: board._id,
                     });
                     yield pin.save();
                     pins.push(pin);
-                    // Create comments
                     for (let j = 1; j <= 3; j++) {
                         const comment = new comment_model_1.default({
-                            user: user._id, // Same user comments on their own pins
+                            user: user._id,
                             pin: pin._id,
                             text: `Comment ${j} on pin ${i}`,
                         });
                         yield comment.save();
                     }
-                    // Create likes
                     for (let k = 0; k < 2; k++) {
                         const like = new like_model_1.default({
-                            user: user._id, // Same user likes their own pins
+                            user: user._id,
                             pin: pin._id,
                         });
                         yield like.save();

@@ -20,7 +20,10 @@ const comment_model_1 = __importDefault(require("../models/comment.model"));
 const getBoardByID = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { boardId } = req.params;
-        const board = yield board_model_1.default.findById(boardId);
+        // Find the board by ID and populate the associated pins
+        const board = yield board_model_1.default.findById(boardId).populate({
+            path: 'pins', // Assuming 'pins' is the field in Board schema
+        });
         if (board) {
             return res.status(200).json(board.toObject());
         }
@@ -60,7 +63,9 @@ exports.getPinsByBoardID = getPinsByBoardID;
 const createBoard = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newBoardData = req.body;
+        console.log(newBoardData);
         const newBoard = new board_model_1.default(newBoardData);
+        console.log(newBoard);
         yield newBoard.save();
         res.status(201).json({
             message: "Board created successfully",

@@ -7,8 +7,12 @@ import Comment from "../models/comment.model";
 const getBoardByID = async (req: Request, res: Response) => {
   try {
     const { boardId } = req.params;
-    const board = await Board.findById(boardId);
-    
+
+    // Find the board by ID and populate the associated pins
+    const board = await Board.findById(boardId).populate({
+      path: 'pins', // Assuming 'pins' is the field in Board schema
+    });
+
     if (board) {
       return res.status(200).json(board.toObject());
     } else {
@@ -19,6 +23,11 @@ const getBoardByID = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error retrieving board" });
   }
 };
+
+
+
+
+
 
 export const getPinsByBoardID = async (req: Request, res: Response) => {
   try {
@@ -48,7 +57,10 @@ export const getPinsByBoardID = async (req: Request, res: Response) => {
 const createBoard = async (req: Request, res: Response) => {
   try {
     const newBoardData = req.body;
+    console.log(newBoardData);
     const newBoard = new Board(newBoardData);
+    console.log(newBoard);
+    
     await newBoard.save();
     res.status(201).json({
       message: "Board created successfully",

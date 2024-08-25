@@ -30,7 +30,7 @@ const pinSchema = new mongoose_1.default.Schema({
     description: { type: String },
     imageUrl: { type: String, required: true },
     linkUrl: { type: String },
-    boards: [{ type: mongoose_1.Types.ObjectId, ref: "Board", default: [] }],
+    board: { type: mongoose_1.Schema.Types.ObjectId, ref: "Board" },
     comments: [{ type: mongoose_1.Types.ObjectId, ref: "Comment", default: [] }],
 }, { timestamps: true });
 const Pin = mongoose_1.default.model("Pin", pinSchema);

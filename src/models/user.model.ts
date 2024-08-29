@@ -1,4 +1,3 @@
-
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -10,7 +9,8 @@ export interface IUser extends Document {
   boards: Types.ObjectId[];
   pins: Types.ObjectId[];
   followers: Types.ObjectId[]; 
-  following: Types.ObjectId[]; 
+  following: Types.ObjectId[];
+  searchHistory: string[];
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema<IUser>(
     username: { type: String, required: true, unique: true },
     avatarUrl: { type: String },
     bio: { type: String },
+    searchHistory: [{ type: String, default: [] }],
     boards: [{ type: Schema.Types.ObjectId, ref: "Board", default: [] }],
     pins: [{ type: Schema.Types.ObjectId, ref: "Pin", default: [] }],
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }], 
@@ -31,3 +32,4 @@ const userSchema = new mongoose.Schema<IUser>(
 const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;
+

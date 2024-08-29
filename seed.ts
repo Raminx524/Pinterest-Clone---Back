@@ -13,8 +13,6 @@ dotenv.config();
     await mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string);
     console.log("Database connected");
 
-    
-    
     await User.deleteMany({});
     await Board.deleteMany({});
     await Pin.deleteMany({});
@@ -22,17 +20,17 @@ dotenv.config();
     await Like.deleteMany({});
     console.log("Existing data cleared");
 
-    
-    
+    // Add 30 items to search history
+    const searchHistory = Array.from({ length: 30 }, (_, i) => `Search Item ${i + 1}`);
+
     const user = new User({
       firebaseUid: `uid_12345`,
       email: `user@example.com`,
       username: `user`,
-      avatarUrl: `http:
-      
-      //example.com/avatar.png`,
+      avatarUrl: `http://example.com/avatar.png`,
       bio: `Bio for user`,
       boards: [],
+      searchHistory: searchHistory,
       pins: [],
       followers: [],
       following: []
@@ -40,8 +38,6 @@ dotenv.config();
     await user.save();
     console.log("User created");
 
-    
-    
     const boards = [];
     for (let i = 1; i <= 2; i++) {
       const board = new Board({
@@ -64,32 +60,24 @@ dotenv.config();
           user: board.user,
           title: `Pin ${i}`,
           description: `Description for pin ${i}`,
-          imageUrl: `http:
-          
-          //example.com/image${i}.png`,
+          imageUrl: `http://example.com/image${i}.png`,
           board: board._id,
         });
         await pin.save();
         pins.push(pin);
 
-        
-        
         for (let j = 1; j <= 3; j++) {
           const comment = new Comment({
             user: user._id, 
-            
             pin: pin._id,
             text: `Comment ${j} on pin ${i}`,
           });
           await comment.save();
         }
 
-        
-        
         for (let k = 0; k < 2; k++) {
           const like = new Like({
             user: user._id, 
-            
             pin: pin._id,
           });
           await like.save();

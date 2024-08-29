@@ -4,6 +4,7 @@ import User from "../models/user.model";
 import Board from "../models/board.model";
 import Like from "../models/like.model";
 import Comment from "../models/comment.model";
+import { Types } from "mongoose";
 
 
 
@@ -70,7 +71,7 @@ export const createPIn = async (req: Request, res: Response) => {
 
     const pin = new Pin(newPin);
     const response = await pin.save();
-    board.pins.push(pin._id)
+    board.pins.push(pin._id as Types.ObjectId);
     await board.save();
     console.log(response);
 

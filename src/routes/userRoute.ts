@@ -3,7 +3,15 @@ import { userController } from "../controllers/userController";
 
 const router = express.Router();
 
-const { getBoardsByUserID,getUser,createUser,updateUser,getUserSearchHistory,setSearchHistory,deleteFromUserSearchHistory } = userController;
+const {
+  getBoardsByUserID,
+  getUser,
+  createUser,
+  updateUser,
+  getUserSearchHistory,
+  setSearchHistory,
+  deleteFromUserSearchHistory,
+} = userController;
 
 router.get("/", getUser);
 router.get("/:userID", getBoardsByUserID);

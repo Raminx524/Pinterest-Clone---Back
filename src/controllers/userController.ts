@@ -7,12 +7,12 @@ const getBoardsByUserID = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const boards = await Board.find({ user: userId }).populate({
-      path: 'pins', 
-      options: { limit: 3 }
+      path: "pins",
+      options: { limit: 3 },
     });
 
     if (boards.length > 0) {
-      return res.status(200).json(boards.map(board => board.toObject()));
+      return res.status(200).json(boards.map((board) => board.toObject()));
     } else {
       return res.status(404).json({ message: "No boards found for user" });
     }
@@ -24,11 +24,10 @@ const getBoardsByUserID = async (req: Request, res: Response) => {
 export const getUserSearchHistory = async (req: Request, res: Response) => {
   try {
     const { userID } = req.params;
-    
-    const user = await User.findById(userID);  
-    if (!user) return res.status(404).json({ message: "User not found" });
-    return res.status(200).json(user.searchHistory.slice(0,20));  
 
+    const user = await User.findById(userID);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    return res.status(200).json(user.searchHistory.slice(0, 20));
   } catch (error) {
     res.status(500).json({ message: "Error retrieving search history" });
   }
@@ -37,39 +36,40 @@ export const getUserSearchHistory = async (req: Request, res: Response) => {
 export const setSearchHistory = async (req: Request, res: Response) => {
   try {
     const { userID } = req.params;
-    const { search } = req.body; 
+    const { search } = req.body;
     console.log(req.body);
-    
-    const user = await User.findById(userID);  
+
+    const user = await User.findById(userID);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.searchHistory = user.searchHistory.filter(item => item !== search);
-    user.searchHistory.unshift(search); 
-    
+    user.searchHistory = user.searchHistory.filter((item) => item !== search);
+    user.searchHistory.unshift(search);
+
     await user.save();
 
-    return res.status(200).json({ message: "updated search history" });  
-
+    return res.status(200).json({ message: "updated search history" });
   } catch (error) {
     console.error("Error updating search history:", error);
     res.status(500).json({ message: "Error updating search history" });
   }
 };
 
-export const deleteFromUserSearchHistory = async (req: Request, res: Response) => {
+export const deleteFromUserSearchHistory = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { userID } = req.params;
-    const { search } = req.body; 
+    const { search } = req.body;
 
-    const user = await User.findById(userID);  
+    const user = await User.findById(userID);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.searchHistory=user.searchHistory.filter(item => item !== search);
-    
+    user.searchHistory = user.searchHistory.filter((item) => item !== search);
+
     await user.save();
 
-    return res.status(200).json({ message: "deleted search history" });  
-
+    return res.status(200).json({ message: "deleted search history" });
   } catch (error) {
     console.error("Error updating search history:", error);
     res.status(500).json({ message: "Error updating search history" });
@@ -77,15 +77,42 @@ export const deleteFromUserSearchHistory = async (req: Request, res: Response) =
 };
 
 const getUser = async (req: Request, res: Response) => {
+  const query = req.query;
+  try {
+    const user = await User.findOne(query);
+    if (!user) {
+      res
+        .status(404)
+        .json({ message: `User not found with the query: ${query}` });
+      return;
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    console.log("Error fetching user: ", { err });
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 const createUser = async (req: Request, res: Response) => {
+  const newUser = req.body;
+  try {
+    const savedUser = await User.create(newUser);
+    res.status(201).json(savedUser);
+  } catch (err: any) {
+    console.log("CreateUser Error:", err);
 
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
-const updateUser = async (req: Request, res: Response) => {
-};
+const updateUser = async (req: Request, res: Response) => {};
 
 export const userController = {
-  getBoardsByUserID,getUser,createUser,updateUser,getUserSearchHistory,setSearchHistory,deleteFromUserSearchHistory
+  getBoardsByUserID,
+  getUser,
+  createUser,
+  updateUser,
+  getUserSearchHistory,
+  setSearchHistory,
+  deleteFromUserSearchHistory,
 };

@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config(); 
 
 import express, { Application } from "express";
-import cors from "cors";
 import connectDB from "./config/db";
 import { createServer, Server } from "http";
 import { Server as SocketIOServer } from "socket.io";
@@ -14,16 +13,12 @@ import userRoute from "./routes/userRoute";
 
 const app: Application = express();
 export const server: Server = createServer(app);
-export const io = new SocketIOServer(server, {
-  cors: {
-    origin: "*",
-  },
-});
 connectDB();
+const cors = require('cors');
+app.use(cors());
 
 app.use(express.static("public"));
 app.use(express.json());
-app.use(cors());
 
 app.use("/api/pin", pinRoute);
 app.use("/api/board", boardRoute);

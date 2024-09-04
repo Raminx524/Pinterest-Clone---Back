@@ -68,9 +68,10 @@ const deleteComment = async (req: Request, res: Response) => {
 
     const pin = await Pin.findById(commentToDelete.pin);
     if (pin) {
-      pin.comments.pull(commentToDelete._id);
+      (pin.comments as Types.Array<Types.ObjectId>).pull(commentToDelete._id);  // Typecasting here
       await pin.save();
     }
+    
     await Comment.findByIdAndDelete(commentId);
 
     return res.status(200).json({ message: "Comment deleted successfully" });
@@ -79,6 +80,9 @@ const deleteComment = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting comment" });
   }
 };
+
+export default deleteComment;
+
 
 export const commentController = {
   createComment,

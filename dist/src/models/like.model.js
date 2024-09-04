@@ -24,17 +24,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const userSchema = new mongoose_1.default.Schema({
-    firebaseUid: { type: String, required: true, unique: true },
-    email: { type: String, required: true },
-    username: { type: String, required: true, unique: true },
-    avatarUrl: { type: String },
-    bio: { type: String },
-    searchHistory: [{ type: String, default: [] }],
-    boards: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Board", default: [] }],
-    pins: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Pin", default: [] }],
-    followers: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
+const likeSchema = new mongoose_1.default.Schema({
+    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    pin: { type: mongoose_1.Schema.Types.ObjectId, ref: "Pin", required: true },
 }, { timestamps: true });
-const User = mongoose_1.default.model("User", userSchema);
-exports.default = User;
+const Like = mongoose_1.default.model("Like", likeSchema);
+exports.default = Like;

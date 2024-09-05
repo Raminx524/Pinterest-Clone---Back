@@ -6,8 +6,15 @@ import Like from "../models/like.model";
 import Comment from "../models/comment.model";
 import { Types } from "mongoose";
 
-
-
+export const getPins = async (req: Request, res: Response) => {
+  try {
+    const pins = await Pin.find();
+    res.status(200).json(pins);
+  } catch (err) {
+    console.log("Error getting pins:" + err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 export const getPinByID = async (req: Request, res: Response) => {
   try {
@@ -15,23 +22,25 @@ export const getPinByID = async (req: Request, res: Response) => {
     if (!pinId) {
       return res.status(400).json({ message: "Invalid pin ID" });
     }
-    
+
     // Fetch the pin
-    const pin = await Pin.findById(pinId)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'user',
-          select: 'username avatarUrl',
-        }
-      });
+    const pin = await Pin.findById(pinId).populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username avatarUrl",
+      },
+    });
 
     if (!pin) {
       return res.status(404).json({ message: "Pin not found" });
     }
 
     // Fetch likes associated with the pin
-    const likes = await Like.find({ pin: pinId }).populate('user', 'username avatarUrl');
+    const likes = await Like.find({ pin: pinId }).populate(
+      "user",
+      "username avatarUrl"
+    );
 
     // Attach likes to the pin object
     const pinWithLikes = {
@@ -51,12 +60,9 @@ export const getPinByID = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
-
 
     const user = await User.findById(newPin.user);
     const board = await Board.findById(newPin.board);
@@ -104,7 +110,9 @@ export const deletePin = async (req: Request, res: Response) => {
 
     await Like.deleteMany({ pin: pin._id });
 
-    return res.status(200).json({ message: "Pin and associated data removed successfully" });
+    return res
+      .status(200)
+      .json({ message: "Pin and associated data removed successfully" });
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error deleting pin:", error.message);
@@ -116,7 +124,9 @@ export const deletePin = async (req: Request, res: Response) => {
   }
 };
 
-
 export const pinsController = {
-  getPinByID, createPIn, deletePin
+  getPins,
+  getPinByID,
+  createPIn,
+  deletePin,
 };

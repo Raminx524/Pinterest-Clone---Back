@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface ITopic extends Document {
   title: string;

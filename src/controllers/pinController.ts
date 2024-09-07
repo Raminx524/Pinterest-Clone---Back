@@ -8,6 +8,7 @@ import { Types } from "mongoose";
 import QueryString from "qs";
 import Topic from "../models/topic.model";
 
+
 interface ICritiria {
   title?: {};
   description?: {};
@@ -126,23 +127,21 @@ export const getPinByID = async (req: Request, res: Response) => {
 export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
-
+    console.log(newPin)
     const user = await User.findById(newPin.user);
-    const board = await Board.findById(newPin.board);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!board) {
-      return res.status(404).json({ message: "Board not found" });
-    }
+
 
     const pin = new Pin(newPin);
     const response = await pin.save();
     board.pins.push(pin._id as Types.ObjectId);
     await board.save();
     // console.log(response);
+
 
     return res.status(201).json(pin);
   } catch (error) {

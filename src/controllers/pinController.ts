@@ -12,11 +12,16 @@ import Topic from "../models/topic.model";
 interface ICritiria {
   title?: {};
   description?: {};
+  user?: string;
   topics?: {};
   [key: string]: any;
+
 }
 async function buildCritiria(query: QueryString.ParsedQs) {
   const critiria: ICritiria = {};
+  if (query.user) {
+    critiria.user = query.user as string;
+  }
 
   const orConditions = [];
 
@@ -77,7 +82,10 @@ export const getPins = async (req: Request, res: Response) => {
     const limit = query.limit;
     const page = query.page;
 
+
+    
     const critiria = await buildCritiria(query);
+console.log({ critiria });
 
     if (!limit || !page) {
       const allPins = await Pin.find();
@@ -127,19 +135,17 @@ export const getPinByID = async (req: Request, res: Response) => {
 export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
-    console.log(newPin)
+    console.log(newPin);
     const user = await User.findById(newPin.user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-
-
     const pin = new Pin(newPin);
     const response = await pin.save();
-    board.pins.push(pin._id as Types.ObjectId);
-    await board.save();
+    user.pins.push(response._id as Types.ObjectId);
+    await user.save();
     // console.log(response);
 
 

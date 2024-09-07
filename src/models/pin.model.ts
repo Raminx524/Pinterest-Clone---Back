@@ -6,7 +6,7 @@ export interface IPin extends Document {
   description?: string;
   imageUrl: string;
   linkUrl?: string;
-  board: Types.ObjectId;
+  board?: Types.ObjectId;
   comments: Types.ObjectId[];
 }
 
@@ -17,7 +17,7 @@ const pinSchema = new mongoose.Schema<IPin>(
     description: { type: String },
     imageUrl: { type: String, required: true },
     linkUrl: { type: String },
-    board: { type: Schema.Types.ObjectId, ref: "Board" },
+    board: { type: Schema.Types.ObjectId, ref: "Board", default: null },
     comments: [{ type: Types.ObjectId, ref: "Comment", default: [] }],
   },
   { timestamps: true }

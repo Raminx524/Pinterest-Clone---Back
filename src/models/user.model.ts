@@ -10,7 +10,7 @@ export interface IUser extends Document {
   avatarUrl?: string;
   bio?: string;
   boards: Types.ObjectId[];
-  topics: string[];
+  topics: Types.ObjectId[];
   pins: Types.ObjectId[];
   followers: Types.ObjectId[];
   following: Types.ObjectId[];
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema<IUser>(
     bio: { type: String },
     searchHistory: [{ type: String, default: [] }],
     boards: [{ type: Schema.Types.ObjectId, ref: "Board", default: [] }],
-    topics: [{ type: String, default: [] }],
+    topics: [{ type: Schema.Types.ObjectId, ref: "Topic", default: [] }],
     pins: [{ type: Schema.Types.ObjectId, ref: "Pin", default: [] }],
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],

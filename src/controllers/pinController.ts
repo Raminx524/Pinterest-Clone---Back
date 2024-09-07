@@ -6,30 +6,78 @@ import Like from "../models/like.model";
 import Comment from "../models/comment.model";
 import { Types } from "mongoose";
 import QueryString from "qs";
-import { log } from "console";
+import Topic from "../models/topic.model";
+
 
 interface ICritiria {
   title?: {};
   description?: {};
+  topics?: {};
+  [key: string]: any;
 }
-function buildCritiria(query: QueryString.ParsedQs) {
+async function buildCritiria(query: QueryString.ParsedQs) {
   const critiria: ICritiria = {};
 
-  if (query.search) {
-    critiria.title = { $regex: query.search, $options: "i" };
-    critiria.description = { $regex: query.search, $options: "i" };
+  const orConditions = [];
+
+  // Проверка на строку или массив строк в query.search
+  if (typeof query.search === "string" || Array.isArray(query.search)) {
+    const searchTerms = Array.isArray(query.search)
+      ? query.search
+      : [query.search];
+
+    // Фильтруем, чтобы убедиться, что все элементы searchTerms - строки
+    const validSearchTerms = searchTerms.filter(
+      (term): term is string => typeof term === "string"
+    );
+
+    // Поиск по title и description
+    validSearchTerms.forEach((term) => {
+      orConditions.push({ title: { $regex: term, $options: "i" } });
+      orConditions.push({ description: { $regex: term, $options: "i" } });
+    });
+
+    // Поиск по topics по названию
+    const topicsByName = await Topic.find({
+      title: { $in: validSearchTerms.map((term) => new RegExp(term, "i")) },
+    }).select("_id");
+
+    const topicIdsByName = topicsByName.map((topic) => topic._id);
+
+    if (topicIdsByName.length > 0) {
+      orConditions.push({ topics: { $in: topicIdsByName } });
+    }
+  }
+
+  // Проверка на query.topic для поиска по ID тем
+  if (query.topic) {
+    const topicIds = Array.isArray(query.topic) ? query.topic : [query.topic];
+
+    // Фильтруем, чтобы убедиться, что все элементы topicIds - это строки
+    const validTopicIds = topicIds.filter(
+      (id): id is string => typeof id === "string"
+    );
+
+    // Добавляем условие поиска по topic ID
+    if (validTopicIds.length > 0) {
+      orConditions.push({ topics: { $in: validTopicIds } });
+    }
+  }
+
+  // Если есть условия, добавляем их в $or
+  if (orConditions.length > 0) {
+    critiria.$or = orConditions;
   }
 
   return critiria;
 }
-
 export const getPins = async (req: Request, res: Response) => {
   try {
     const query = req.query;
     const limit = query.limit;
     const page = query.page;
 
-    const critiria = buildCritiria(query);
+    const critiria = await buildCritiria(query);
 
     if (!limit || !page) {
       const allPins = await Pin.find();
@@ -58,31 +106,13 @@ export const getPinByID = async (req: Request, res: Response) => {
     }
 
     // Fetch the pin
-    const pin = await Pin.findById(pinId).populate({
-      path: "comments",
-      populate: {
-        path: "user",
-        select: "username avatarUrl",
-      },
-    });
+    const pin = await Pin.findById(pinId).populate("user");
 
     if (!pin) {
       return res.status(404).json({ message: "Pin not found" });
     }
 
-    // Fetch likes associated with the pin
-    const likes = await Like.find({ pin: pinId }).populate(
-      "user",
-      "username avatarUrl"
-    );
-
-    // Attach likes to the pin object
-    const pinWithLikes = {
-      ...pin.toObject(),
-      likes,
-    };
-
-    res.status(200).json(pinWithLikes);
+    res.status(200).json(pin);
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error fetching pin:", error.message);
@@ -108,7 +138,10 @@ export const createPIn = async (req: Request, res: Response) => {
 
     const pin = new Pin(newPin);
     const response = await pin.save();
-    console.log(response);
+    board.pins.push(pin._id as Types.ObjectId);
+    await board.save();
+    // console.log(response);
+
 
     return res.status(201).json(pin);
   } catch (error) {

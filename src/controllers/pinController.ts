@@ -11,9 +11,13 @@ import { log } from "console";
 interface ICritiria {
   title?: {};
   description?: {};
+  user?: string;
 }
 function buildCritiria(query: QueryString.ParsedQs) {
   const critiria: ICritiria = {};
+  if (query.user) {
+    critiria.user = query.user as string;
+  }
 
   if (query.search) {
     critiria.title = { $regex: query.search, $options: "i" };
@@ -30,6 +34,7 @@ export const getPins = async (req: Request, res: Response) => {
     const page = query.page;
 
     const critiria = buildCritiria(query);
+    console.log({ critiria });
 
     if (!limit || !page) {
       const allPins = await Pin.find();
@@ -97,18 +102,17 @@ export const getPinByID = async (req: Request, res: Response) => {
 export const createPIn = async (req: Request, res: Response) => {
   try {
     const newPin = req.body;
-    console.log(newPin)
+    console.log(newPin);
     const user = await User.findById(newPin.user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-
-
     const pin = new Pin(newPin);
     const response = await pin.save();
-    console.log(response);
+    user.pins.push(response._id as Types.ObjectId);
+    await user.save();
 
     return res.status(201).json(pin);
   } catch (error) {

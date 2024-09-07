@@ -78,6 +78,8 @@ export const deleteFromUserSearchHistory = async (
 
 const getUser = async (req: Request, res: Response) => {
   const query = req.query;
+  console.log({ query });
+
   try {
     const user = await User.findOne(query);
     if (!user) {

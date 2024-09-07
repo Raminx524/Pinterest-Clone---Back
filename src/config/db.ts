@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-dotenv.config(); // Load env vars
+dotenv.config();
 
 async function connectDB() {
   try {

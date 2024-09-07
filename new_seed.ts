@@ -9,9 +9,9 @@ dotenv.config(); // Load env vars
 
 // Настройка Cloudinary
 cloudinary.config({
-  cloud_name: "dtnear5xs",
-  api_key: "995822627993784",
-  api_secret: "IqWDC1wtN80k0Bqw82xORaYenuQ",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 async function createPinsFromCloudinary() {

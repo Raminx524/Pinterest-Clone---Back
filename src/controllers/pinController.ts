@@ -5,10 +5,43 @@ import Board from "../models/board.model";
 import Like from "../models/like.model";
 import Comment from "../models/comment.model";
 import { Types } from "mongoose";
+import QueryString from "qs";
+
+interface ICritiria {
+  title?: {};
+  description?: {};
+}
+function buildCritiria(query: QueryString.ParsedQs) {
+  const critiria: ICritiria = {};
+
+  if (query.search) {
+    critiria.title = { $regex: query.search, $options: "i" };
+    critiria.description = { $regex: query.search, $options: "i" };
+  }
+
+  return critiria;
+}
 
 export const getPins = async (req: Request, res: Response) => {
   try {
-    const pins = await Pin.find();
+    const query = req.query;
+    const limit = query.limit;
+    const page = query.page;
+
+    const critiria = buildCritiria(query);
+
+    if (!limit || !page) {
+      const allPins = await Pin.find();
+      return res.status(200).json(allPins);
+    }
+
+    let offset = +page === 1 ? 0 : (+page - 1) * +limit;
+
+    const pins = await Pin.find(critiria)
+      .populate("user")
+      .skip(offset)
+      .limit(limit ? +limit : 0);
+
     res.status(200).json(pins);
   } catch (err) {
     console.log("Error getting pins:" + err);

@@ -3,21 +3,23 @@ import { v2 as cloudinary } from "cloudinary";
 import User from "./src/models/user.model"; // замените на правильный путь импорта вашей модели User
 import Pin from "./src/models/pin.model"; // замените на правильный путь импорта вашей модели Pin
 import Board from "./src/models/board.model"; // замените на правильный путь импорта вашей модели Board
+import { log } from "console";
+import dotenv from "dotenv";
+dotenv.config(); // Load env vars
 
 // Настройка Cloudinary
 cloudinary.config({
-  cloud_name: "dikbmr1ja",
-  api_key: "368445348754717",
-  api_secret: "nIk9pHfXhOwFSRpRYA8fAqj7o94",
+  cloud_name: "dtnear5xs",
+  api_key: "995822627993784",
+  api_secret: "IqWDC1wtN80k0Bqw82xORaYenuQ",
 });
 
 async function createPinsFromCloudinary() {
   try {
     // Подключение к MongoDB
-    await mongoose.connect(
-      "mongodb+srv://raminx524:832514473o@cluster0.1grnnsu.mongodb.net/Pinterest-Clone?retryWrites=true&w=majority&appName=Cluster0"
-    );
-
+    await mongoose.connect(process.env.MONGO_URI as string);
+    await Pin.deleteMany();
+    await Board.deleteMany();
     console.log("Connected to MongoDB");
 
     // Создание нового пользователя
@@ -73,11 +75,11 @@ async function createPinsFromCloudinary() {
         try {
           // Определение типа ресурса
           interface CloudinaryResource {
-            url: string;
+            secure_url: string;
           }
 
           const imageUrls = result.resources.map(
-            (resource: CloudinaryResource) => resource.url
+            (resource: CloudinaryResource) => resource.secure_url
           );
 
           // Проход по каждому URL и создание объекта Pin

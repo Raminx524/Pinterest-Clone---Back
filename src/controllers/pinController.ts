@@ -8,7 +8,6 @@ import { Types } from "mongoose";
 import QueryString from "qs";
 import Topic from "../models/topic.model";
 
-
 interface ICritiria {
   title?: {};
   description?: {};
@@ -146,7 +145,6 @@ export const createPIn = async (req: Request, res: Response) => {
     const response = await pin.save();
     user.pins.push(response._id as Types.ObjectId);
     await user.save();
-    // console.log(response);
 
 
     return res.status(201).json(pin);

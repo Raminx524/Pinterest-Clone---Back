@@ -14,15 +14,13 @@ interface ICritiria {
   user?: string;
   topics?: {};
   [key: string]: any;
-
 }
 async function buildCritiria(query: QueryString.ParsedQs) {
   const critiria: ICritiria = {};
+  const orConditions = [];
   if (query.user) {
     critiria.user = query.user as string;
   }
-
-  const orConditions = [];
 
   // Проверка на строку или массив строк в query.search
   if (typeof query.search === "string" || Array.isArray(query.search)) {
@@ -81,13 +79,11 @@ export const getPins = async (req: Request, res: Response) => {
     const limit = query.limit;
     const page = query.page;
 
-
-    
     const critiria = await buildCritiria(query);
-console.log({ critiria });
+    console.log({ critiria });
 
     if (!limit || !page) {
-      const allPins = await Pin.find();
+      const allPins = await Pin.find(critiria);
       return res.status(200).json(allPins);
     }
 
@@ -145,7 +141,6 @@ export const createPIn = async (req: Request, res: Response) => {
     const response = await pin.save();
     user.pins.push(response._id as Types.ObjectId);
     await user.save();
-
 
     return res.status(201).json(pin);
   } catch (error) {
